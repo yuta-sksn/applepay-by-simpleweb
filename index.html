@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Apple Pay Integration Alternative Example</title>
+    <script src="https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"></script>
+    <style>
+        .apple-pay-button {
+            display: inline-block;
+            background-color: black;
+            background-image: -webkit-named-image(apple-pay-logo-white);
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 5px;
+            padding: 10px 50px;
+            cursor: pointer;
+            width: 200px; /* Adjust as needed */
+            height: 44px; /* Adjust as needed */
+        }
+    </style>
+</head>
+<body>
+
+<div class="apple-pay-button" id="apple-pay-button"></div>
+
+<script>
+    document.getElementById('apple-pay-button').addEventListener('click', function() {
+        if (window.ApplePaySession) {
+            if (ApplePaySession.canMakePayments()) {
+                var paymentRequest = {
+                    countryCode: 'US',
+                    currencyCode: 'USD',
+                    supportedNetworks: ['visa', 'masterCard', 'amex', 'discover'],
+                    merchantCapabilities: ['supports3DS'],
+                    total: { label: 'Your Business Name', amount: '10.00' }
+                };
+
+                var session = new ApplePaySession(3, paymentRequest);
+
+                session.onvalidatemerchant = function (event) {
+                    // Implement merchant validation here
+                    var validationURL = event.validationURL;
+                    // Send validationURL to your server and complete the validation
+                };
+
+                session.onpaymentauthorized = function (event) {
+                    // Handle authorized payment here
+                    var payment = event.payment;
+                    // Process the payment
+                    session.completePayment(ApplePaySession.STATUS_SUCCESS);
+                    // Implement post-payment logic
+                };
+
+                // Start the session
+                session.begin();
+            } else {
+                console.error("Apple Pay is not available on this device.");
+            }
+        } else {
+            console.error("Apple Pay is not supported in this browser.");
+        }
+    });
+</script>
+
+</body>
+</html>
+
